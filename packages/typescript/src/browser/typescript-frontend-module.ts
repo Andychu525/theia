@@ -27,10 +27,12 @@ import { JavascriptGrammarContribution } from './javascript-language-config';
 import { TypeScriptFrontendContribution } from './typescript-frontend-contribution';
 import { TypeScriptEditorTextFocusContext } from './typescript-keybinding-contexts';
 import { bindTypescriptPreferences } from './typescript-preferences';
+import { TypeScriptVersionManager } from './typescript-version-manager';
 
 export default new ContainerModule(bind => {
     bindTypescriptPreferences(bind);
 
+    bind(TypeScriptVersionManager).toSelf().inSingletonScope();
     bind(TypeScriptClientContribution).toSelf().inSingletonScope();
     bind(LanguageClientContribution).toService(TypeScriptClientContribution);
 

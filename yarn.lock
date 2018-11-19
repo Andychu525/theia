@@ -9588,9 +9588,10 @@ typedoc@^0.13.0:
     typedoc-default-themes "^0.5.0"
     typescript "3.1.x"
 
-typescript-language-server@^0.3.5:
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/typescript-language-server/-/typescript-language-server-0.3.5.tgz#1d07237b014df40fdad1588a151c0190668db313"
+typescript-language-server@^0.3.7:
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/typescript-language-server/-/typescript-language-server-0.3.7.tgz#ca4c28c1b9b4b9e6f9a60514ba059865ea5e48ef"
+  integrity sha512-26VcyfcMGjojsQv0/uDG8ZxUOhCbH6wNZR1buajQv5hZYxNSqiCm+9InMPjozatECpyfphqVc0rc58q3B+dMfw==
   dependencies:
     command-exists "1.2.6"
     commander "^2.11.0"

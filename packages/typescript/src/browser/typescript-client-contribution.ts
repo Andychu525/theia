@@ -18,8 +18,11 @@ import { injectable, inject, postConstruct } from 'inversify';
 import URI from '@theia/core/lib/common/uri';
 import { BaseLanguageClientContribution, Workspace, Languages, LanguageClientFactory, ILanguageClient, State } from '@theia/languages/lib/browser';
 import { TypeScriptInitializationOptions, TypeScriptInitializeResult } from 'typescript-language-server/lib/ts-protocol';
-import { TYPESCRIPT_LANGUAGE_ID, TYPESCRIPT_LANGUAGE_NAME, TYPESCRIPT_REACT_LANGUAGE_ID, JAVASCRIPT_LANGUAGE_ID, JAVASCRIPT_REACT_LANGUAGE_ID } from '../common';
+import {
+    TYPESCRIPT_LANGUAGE_ID, TYPESCRIPT_LANGUAGE_NAME, TYPESCRIPT_REACT_LANGUAGE_ID, JAVASCRIPT_LANGUAGE_ID, JAVASCRIPT_REACT_LANGUAGE_ID, TypescriptStartParams
+} from '../common';
 import { TypescriptPreferences } from './typescript-preferences';
+import { TypeScriptVersionManager } from './typescript-version-manager';
 
 @injectable()
 export class TypeScriptClientContribution extends BaseLanguageClientContribution {
@@ -29,6 +32,9 @@ export class TypeScriptClientContribution extends BaseLanguageClientContribution
 
     @inject(TypescriptPreferences)
     protected readonly preferences: TypescriptPreferences;
+
+    @inject(TypeScriptVersionManager)
+    protected readonly versionManager: TypeScriptVersionManager;
 
     constructor(
         @inject(Workspace) protected readonly workspace: Workspace,
@@ -45,6 +51,13 @@ export class TypeScriptClientContribution extends BaseLanguageClientContribution
                 this.restart();
             }
         });
+        this.versionManager.onDidChangeCurrentVersion(() => this.restart());
+    }
+
+    get startParameters(): TypescriptStartParams {
+        const { currentVersion, defaultVersion } = this.versionManager;
+        const tsServerPath = !defaultVersion.equals(currentVersion) ? currentVersion.tsServerPath.toString() : undefined;
+        return { tsServerPath };
     }
 
     protected get documentSelector(): string[] {

@@ -25,3 +25,7 @@ export const JAVASCRIPT_LANGUAGE_NAME = 'JavaScript';
 
 export const JAVASCRIPT_REACT_LANGUAGE_ID = 'javascriptreact';
 export const JAVASCRIPT_REACT_LANGUAGE_NAME = 'JavaScript React';
+
+export interface TypescriptStartParams {
+    tsServerPath?: string
+}

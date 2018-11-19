@@ -5,9 +5,11 @@
   "dependencies": {
     "@theia/callhierarchy": "^0.3.16",
     "@theia/core": "^0.3.16",
+    "@theia/filesystem": "^0.3.16",
     "@theia/languages": "^0.3.16",
     "@theia/monaco": "^0.3.16",
-    "typescript-language-server": "^0.3.5"
+    "@theia/workspace": "^0.3.16",
+    "typescript-language-server": "^0.3.7"
   },
   "publishConfig": {
     "access": "public"

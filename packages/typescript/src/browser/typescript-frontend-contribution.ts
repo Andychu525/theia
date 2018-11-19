@@ -17,7 +17,7 @@
 import { injectable, inject, postConstruct } from 'inversify';
 import * as tsp from 'typescript/lib/protocol';
 import { Commands } from 'typescript-language-server/lib/commands';
-import { QuickPickService, KeybindingRegistry, KeybindingContribution } from '@theia/core/lib/browser';
+import { QuickPickService, KeybindingRegistry, KeybindingContribution, QuickPickItem } from '@theia/core/lib/browser';
 import { ExecuteCommandRequest } from '@theia/languages/lib/browser';
 import { EditorManager, EditorWidget, EDITOR_CONTEXT_MENU } from '@theia/editor/lib/browser';
 import { CommandContribution, CommandRegistry, Command, MenuModelRegistry, MenuContribution } from '@theia/core/lib/common';
@@ -26,6 +26,7 @@ import { TYPESCRIPT_LANGUAGE_ID } from '../common';
 import { TypeScriptClientContribution } from './typescript-client-contribution';
 import { TypeScriptKeybindingContexts } from './typescript-keybinding-contexts';
 import { FileSystemWatcher, FileMoveEvent } from '@theia/filesystem/lib/browser';
+import { TypeScriptVersionManager, TypescriptVersion } from './typescript-version-manager';
 
 export namespace TypeScriptCommands {
     export const applyCompletionCodeAction: Command = {
@@ -33,12 +34,19 @@ export namespace TypeScriptCommands {
     };
     // TODO: get rid of me when https://github.com/TypeFox/monaco-languageclient/issues/104 is resolved
     export const organizeImports: Command = {
-        label: 'TypeScript: Organize Imports',
+        category: 'TypeScript',
+        label: 'Organize Imports',
         id: 'typescript.edit.organizeImports'
     };
     export const openServerLog: Command = {
-        label: 'TypeScript: Open Server Log',
+        category: 'TypeScript',
+        label: 'Open Server Log',
         id: 'typescript.server.openLog'
+    };
+    export const selectVersion: Command = {
+        category: 'TypeScript',
+        label: 'Select Version',
+        id: 'typescript.selectVersion'
     };
 }
 
@@ -56,6 +64,9 @@ export class TypeScriptFrontendContribution implements CommandContribution, Menu
 
     @inject(FileSystemWatcher)
     protected readonly fileSystemWatcher: FileSystemWatcher;
+
+    @inject(TypeScriptVersionManager)
+    protected readonly versionManager: TypeScriptVersionManager;
 
     @postConstruct()
     protected init(): void {
@@ -78,6 +89,9 @@ export class TypeScriptFrontendContribution implements CommandContribution, Menu
             execute: () => this.openServerLog(),
             isEnabled: () => !!this.clientContribution.logFileUri,
             isVisible: () => !!this.clientContribution.logFileUri
+        });
+        commands.registerCommand(TypeScriptCommands.selectVersion, {
+            execute: () => this.selectVersion()
         });
     }
 
@@ -149,6 +163,30 @@ export class TypeScriptFrontendContribution implements CommandContribution, Menu
                 targetUri: targetUri.toString()
             }]
         });
+    }
+
+    protected async selectVersion(): Promise<void> {
+        const { defaultVersion, useWorkspaceTsdk, currentVersion } = this.versionManager;
+        const items: QuickPickItem<TypescriptVersion>[] = [];
+        items.push({
+            label: (!useWorkspaceTsdk ? '• ' : '') + 'Use Default Version',
+            // description: version.version, TODO: how to get it?
+            value: defaultVersion
+        });
+        for (const version of this.versionManager.workspaceVersions) {
+            items.push({
+                label: (useWorkspaceTsdk && version.equals(currentVersion) ? '• ' : '') + 'Use Workspace Version',
+                description: version.version,
+                detail: version.path.toString(),
+                value: version
+            });
+        }
+        const selectedVersion = await this.quickPickService.show(items, {
+            placeholder: 'Select the TypeScript version used for JavaScript and TypeScript language features'
+        });
+        if (selectedVersion) {
+            this.versionManager.currentVersion = selectedVersion;
+        }
     }
 
 }
